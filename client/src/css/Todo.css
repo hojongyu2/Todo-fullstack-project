@@ -1,0 +1,12 @@
+.contatiner {
+    display: flex;
+}
+.category-section {
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px solid black;
+}
+.todo-section {
+    display: flex;
+    flex-direction: column;
+}

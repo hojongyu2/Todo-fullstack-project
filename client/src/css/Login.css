@@ -1,0 +1,14 @@
+.container {
+    display: flex;
+}
+.create-account {
+    display: flex;
+    flex-direction: column;
+}
+img {
+    height:300px;
+}
+.login-container {
+    display: flex;
+    flex-direction: column;
+}
