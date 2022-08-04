@@ -15,7 +15,7 @@ export const registerUser = async (username, password) => {
     });
     const responseJSON = await response.json();
     console.log(responseJSON)
-    return responseJSON.success
+    return responseJSON
 }
 
 export const loginUser = async (username, password) => {

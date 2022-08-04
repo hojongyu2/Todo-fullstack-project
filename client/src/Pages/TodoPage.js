@@ -22,14 +22,14 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading }) => {
                     <>
                         <button
                             onClick={ async () => {
-                                console.log('localStorage before deleted :' + localStorage)
+                                console.log(localStorage)
                                 setIsAuthLoading(true)
-                                console.log(isAuthLoading)
+                                console.log("isAuthLoading :" + isAuthLoading)
                                 const logoutSuccess = await logoutUser();
                                 console.log(logoutSuccess)
-                                console.log('localStorage after deleted :' + localStorage)
+                                console.log(localStorage)
                                 if (logoutSuccess.success) {
-                                    console.log(isAuthLoading)
+                                    console.log("isAuthLoading :" + isAuthLoading)
                                     setIsAuthLoading(false)
                                     navigate('/')
                                 }

@@ -19,13 +19,13 @@ User {
     username
     password
     email
-    categoryIdList: {uuid[]} (Category)
+    categoryIdList: {uuid[]} (array of categoryId's)
 }
 
 ToDo {
     toDoId: {uuid}
-    name
     ownerId: {uuid} (User)
+    name
     description
     createdAt: {Date}
     startAt: {Date}
@@ -36,7 +36,7 @@ ToDo {
 Category {
     categoryId: {uuid}
     name
-    toDoIdList: {uuid[]} (ToDo)
+    toDoIdList: {uuid[]} (array of ToDoId's)
 }
 
 Example: 
@@ -76,6 +76,18 @@ Example:
     }
 
 Note:
-    On user registration -> create user, create default("Home") category for user
+    On user registration -> create user, create default "All" category for user
 
-    On user login -> get user, get user's categories, get user's categories' toDo's
+    On user login -> 
+        await get User by username,
+        get categoryIdList in user
+        await get all Categories by ID in the User's categoryIdList
+        get all toDoIdList's in Categories
+        await get all toDo's by ID in the toDoIdList's
+
+    On toDoCreate ->
+        create new ToDo with toDoId and ownerId = userId
+        save toDo
+        save toDoId to the current Category by pushing toDoId into toDoIdList
+
+        

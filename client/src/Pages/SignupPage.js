@@ -8,6 +8,7 @@ import { registerUser, loginUser  } from "../Auth";
 const SignupPage = ({ isAuthLoading, setIsAuthLoading }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [validationMessage, setValidationMessage] = useState("");
     const navigate = useNavigate();
 
     return (
@@ -17,6 +18,9 @@ const SignupPage = ({ isAuthLoading, setIsAuthLoading }) => {
 
             </div>
             <div className="register">
+                <div className="register-validation-message">
+                    {validationMessage && validationMessage}
+                </div>
                 <label><strong>Sign Up</strong></label>
                 <label>usename</label>
                 <input type="text" value={username} onChange={(e) => {
@@ -31,6 +35,13 @@ const SignupPage = ({ isAuthLoading, setIsAuthLoading }) => {
                 <button onClick={ async () => {
                     setIsAuthLoading(true)
                     const registerResult = await registerUser(username, password);
+
+                    if (!registerResult.success) {
+                        setValidationMessage(registerResult.message)
+                        setIsAuthLoading(false);
+                        return;
+                    }
+
                     // console.log(registerResult)
                     if (registerResult) {
                         const loginResult = await loginUser(username, password);
