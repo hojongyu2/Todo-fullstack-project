@@ -1,18 +1,27 @@
 
 import './App.css';
 import { Routes, Route } from "react-router-dom"
+import { useState } from 'react';
 import LoginPage from './Pages/Loginpage';
 import TodoPage from './Pages/TodoPage';
 import SignupPage from './Pages/SignupPage';
 
+
+
 function App() {
+
+  const [isAuthLoading, setIsAuthLoading] = useState('');
+
   return (
     <div className="App">
       <header className="App-header">
         <Routes>
-          <Route path="/" element={<LoginPage/>}/>
-          <Route path="/sign-up" element={<SignupPage />}/>
-          <Route path="/todo" element={<TodoPage/>}/>
+          <Route path="/" element={<LoginPage isAuthLoading={isAuthLoading} 
+          setIsAuthLoading={setIsAuthLoading}  />}/>
+          <Route path="/sign-up" element={<SignupPage isAuthLoading={isAuthLoading} 
+          setIsAuthLoading={setIsAuthLoading} />}/>
+          <Route path="/todo" element={<TodoPage isAuthLoading={isAuthLoading} 
+          setIsAuthLoading={setIsAuthLoading} />}/>
         </Routes>
       </header>
     </div>

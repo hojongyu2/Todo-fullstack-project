@@ -4,9 +4,13 @@
 .category-section {
     display: flex;
     flex-direction: column;
-    border-radius: 5px solid black;
+    /* align-items: center; */
+    justify-content: center;
 }
 .todo-section {
     display: flex;
     flex-direction: column;
+}
+img {
+    height:300px
 }
