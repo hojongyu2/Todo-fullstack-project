@@ -21,27 +21,28 @@ const SignupPage = ({ isAuthLoading, setIsAuthLoading }) => {
                 <div className="register-validation-message">
                     {validationMessage && validationMessage}
                 </div>
-                <label><strong>Sign Up</strong></label>
-                <label>usename</label>
+                <h1>Sign up</h1>
+               
                 <input type="text" value={username} onChange={(e) => {
                     let value = e.target.value
                     setUsername(value)
-                }} ></input>
-                <label>password</label>
-                <input type="text" value={password} onChange={(e) => {
+                }} placeholder="username"></input>
+                
+                <input type="password" value={password} onChange={(e) => {
                     let value = e.target.value
                     setPassword(value)
-                }} ></input>
+                }} placeholder="password"></input>
+
                 <button onClick={ async () => {
                     setIsAuthLoading(true)
                     const registerResult = await registerUser(username, password);
-
+                    console.log(registerResult.success)// this is from backend
+                    console.log(registerResult.message)// this is from backend
                     if (!registerResult.success) {
                         setValidationMessage(registerResult.message)
                         setIsAuthLoading(false);
                         return;
                     }
-
                     // console.log(registerResult)
                     if (registerResult) {
                         const loginResult = await loginUser(username, password);

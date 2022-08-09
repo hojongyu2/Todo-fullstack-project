@@ -14,7 +14,7 @@ const loginValidator = (username, password) => {
     return {isValid: true}
 }
 
-const LoginPage = ({ isAuthLoading, setIsAuthLoading }) => {
+const LoginPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [validationMessage, setValidationMessage] = useState("");
@@ -23,30 +23,33 @@ const LoginPage = ({ isAuthLoading, setIsAuthLoading }) => {
 
     return (
         <div className="login-container">
-            
             <div className="create-account">
                 <img src="https://img.freepik.com/premium-vector/young-man-sits-his-desk-workplace-using-his-personal-desktop-computer-working-online-program-work-home-concept-vector-illustration-isolated-white-background_37895-775.jpg" alt="peace"></img>
                 <button onClick={() => {
                     navigate('/sign-up')
                 }}>Create an account</button>
+            
             </div>
                 <div className="login">
                 <div className="login-validation-message">
                     {validationMessage && validationMessage}
                 </div>
-                    <label><strong>Login</strong></label>
-                    <label>username</label>
+                    <h1>Login</h1>
+                    
+                    {/* {username} */}
                     <input type="text" value={username} onChange={(e) => {
                         const value = e.target.value
                         setUsername(value)
-                    }} required></input>
-                    <label>password</label>
-                    <input type="text" value={password} onChange={(e) => {
+                        setShowUsername(value)
+                    }} placeholder="username"></input>
+
+                    <input type="password" value={password} onChange={(e) => {
                         const value = e.target.value
                         setPassword(value)
-                    }} required></input>
+                    }} placeholder="password"></input>
+
                     <button type="button" onClick={async (e) => {
-                        // e.preventDefault()
+                        
                         const loginValidCheck = loginValidator(username, password)
                         if (!loginValidCheck.isValid) {
                             console.log("Login Invalid")
@@ -57,6 +60,7 @@ const LoginPage = ({ isAuthLoading, setIsAuthLoading }) => {
                         
                         const loginResult = await loginUser(username, password)
                         console.log(loginResult)
+                        console.log(showUsername)
                         setIsAuthLoading(true)
                         if (loginResult) {
                             setIsAuthLoading(false)

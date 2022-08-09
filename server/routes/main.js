@@ -123,4 +123,38 @@ router.get('/validate-token', function(req, res, next){
     }    
 })
 
+router.post('/todos', async function (req, res, next){
+    
+    try {
+        const collection = await blogsDB().collection("users");
+        const decoded = jwt.decode(req.body.userToken);
+        // console.log(decoded)
+        const user = await collection.findOne({
+            uid:decoded.userId
+        })
+
+        if(!user){
+            throw Error("You must login first");
+        }//I think this isn't working
+
+        // console.log(user)
+        // console.log(req.body.text)
+        const todoCollection = await blogsDB().collection("todos");
+        await todoCollection.insertOne({
+            todoId:uuid(),
+            userId:decoded.userId, // decoded? or encryted when you save userid
+            text:req.body.text,
+            createdAt: new Date(),
+            startAt: new Date(),
+            completedAt: new Date(),
+            isCompleted:req.body.isCompleted
+        })
+        res.status(200).json({success:true});
+        
+    }catch (error){
+        return res.status(404).json({success:false})
+    }
+    
+})
+
 module.exports = router;

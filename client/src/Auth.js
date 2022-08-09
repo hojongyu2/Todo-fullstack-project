@@ -1,7 +1,7 @@
 const urlEndpoint = process.env.REACT_APP_URL_ENDPOINT;
 
 export const registerUser = async (username, password) => {
-    const url = `${urlEndpoint}/todo/signup-user`
+    const url = `${urlEndpoint}/main/signup-user`
     console.log(url)
     const response = await fetch(url, {
         method:"POST",
@@ -19,7 +19,7 @@ export const registerUser = async (username, password) => {
 }
 
 export const loginUser = async (username, password) => {
-    const url = `${urlEndpoint}/todo/login-user`
+    const url = `${urlEndpoint}/main/login-user`
     console.log(url)
     const response = await fetch(url, {
         method:"POST",

@@ -25,7 +25,7 @@ User {
 ToDo {
     toDoId: {uuid}
     ownerId: {uuid} (User)
-    name
+    name:
     description
     createdAt: {Date}
     startAt: {Date}
