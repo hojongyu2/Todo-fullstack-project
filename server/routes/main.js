@@ -7,8 +7,8 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 dotenv.config();
 
-router.get('/', function(req, res, next) {
-    res.json({uid: uuid()})
+router.get('/', function (req, res, next) {
+    res.json({ uid: uuid() })
 })
 const createUser = async (username, passwordHash) => {
     try {
@@ -20,7 +20,7 @@ const createUser = async (username, passwordHash) => {
         const collection = await blogsDB().collection('users');
         await collection.insertOne(user);
         return true
-    } catch(e){
+    } catch (e) {
         console.error(e);
         return false;
     }
@@ -37,7 +37,7 @@ const doesUserExist = async (username) => {
             return true
         }
         return false
-    } catch(e){
+    } catch (e) {
         console.error(e);
         throw Error(e)
     }
@@ -45,20 +45,20 @@ const doesUserExist = async (username) => {
 
 const signupValidator = async (username, password) => {
     if (!username) {
-        return {isValid: false, message: "No username provided."}
+        return { isValid: false, message: "No username provided." }
     }
     if (!password) {
-        return {isValid: false, message: "No password provided."}
+        return { isValid: false, message: "No password provided." }
     }
     const userAlreadyExists = await doesUserExist(username)
 
     if (userAlreadyExists) {
-        return {isValid: false, message: "User already exists"}
+        return { isValid: false, message: "User already exists" }
     }
-    return {isValid: true}
+    return { isValid: true }
 }
 
-router.post('/signup-user', async function(req, res, next){
+router.post('/signup-user', async function (req, res, next) {
     try {
         const username = req.body.username;
         const password = req.body.password;
@@ -67,7 +67,7 @@ router.post('/signup-user', async function(req, res, next){
         const signupValidation = await signupValidator(username, password)
 
         if (!signupValidation.isValid) {
-            res.json({success:false, message: signupValidation.message})
+            res.json({ success: false, message: signupValidation.message })
             return;
         }
 
@@ -78,14 +78,14 @@ router.post('/signup-user', async function(req, res, next){
         // Save User
         const userSaveSuccess = await createUser(username, hash)
         console.log(userSaveSuccess)
-        res.status(200).json({success:userSaveSuccess});
-    }catch(e){
+        res.status(200).json({ success: userSaveSuccess });
+    } catch (e) {
         console.log(error(e))
-        res.status(500).json({success: "false from signing up"})
+        res.status(500).json({ success: "false from signing up" })
     }
 })
 
-router.post('/login-user', async function (req, res, next){
+router.post('/login-user', async function (req, res, next) {
     try {
         const collection = await blogsDB().collection("users");
         const user = await collection.findOne({
@@ -95,66 +95,98 @@ router.post('/login-user', async function (req, res, next){
         const data = {
             time: new Date(),
             userId: user.uid
-          };
+        };
         const token = jwt.sign(data, jwtSecretKey);
         const match = await bcrypt.compare(req.body.password, user.password);
-        if(match){
-            res.json({ success: true, token}).status(200)
+        if (match) {
+            res.json({ success: true, token }).status(200)
         }
-    }catch(e){
+    } catch (e) {
         console.log(error(e))
-        res.status(500).json({success: "false from login user"})
+        res.status(500).json({ success: "false from login user" })
     }
 })
-router.get('/validate-token', function(req, res, next){
+router.get('/validate-token', function (req, res, next) {
     const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
     const jwtSecretKey = process.env.JWT_SECRET_KEY;
 
     try {
         const token = req.header(tokenHeaderKey);
         const verified = jwt.verify(token, jwtSecretKey);
-        if(verified){
-            return res.json({success:true})
-        }else {
+        if (verified) {
+            return res.json({ success: true })
+        } else {
             throw Error("Access Denied");
         }
-    }catch (error){
-        return res.status(401).json({success: false, message: String(error)});
-    }    
+    } catch (error) {
+        return res.status(401).json({ success: false, message: String(error) });
+    }
 })
 
-router.post('/todos', async function (req, res, next){
-    
+router.post('/todos', async function (req, res, next) {
+
     try {
         const collection = await blogsDB().collection("users");
         const decoded = jwt.decode(req.body.userToken);
         // console.log(decoded)
         const user = await collection.findOne({
-            uid:decoded.userId
+            uid: decoded.userId
         })
 
-        if(!user){
+        if (!user) {
             throw Error("You must login first");
-        }//I think this isn't working
+        }
 
         // console.log(user)
         // console.log(req.body.text)
         const todoCollection = await blogsDB().collection("todos");
+        const toDoId = uuid()
         await todoCollection.insertOne({
-            todoId:uuid(),
-            userId:decoded.userId, // decoded? or encryted when you save userid
-            text:req.body.text,
+            toDoId,
+            userId: decoded.userId, // decoded? or encryted when you save userid
+            text: req.body.text,
             createdAt: new Date(),
             startAt: new Date(),
             completedAt: new Date(),
-            isCompleted:req.body.isCompleted
+            isCompleted: req.body.isCompleted
         })
-        res.status(200).json({success:true});
+        const categoryCollection = await blogsDB().collection("categories");
+        const dbCategory = await categoryCollection.findOne({
+            // how do I find categoryId?
+            // how do I choose which categoryId to pick If there are multiple categories?
+
+        })
+
+        // Find category by categoryId
+        // Push toDoId into category.toDoIdList
+        // Save category
         
-    }catch (error){
-        return res.status(404).json({success:false})
+        res.status(200).json({ success: true });
+
+    } catch (error) {
+        return res.status(404).json({ success: false })
     }
-    
+
+})
+
+router.post('/categories', async function (req, res, next) {
+
+    try {
+        const categoryId = uuid();
+        const newCategory = {
+            categoryId,
+            name: req.body.categoryName,
+            toDoIdList: []
+        }
+        console.log(req.body.categoryName)
+        const categoryCollection = await blogsDB().collection("categories")
+        // await categoryCollection.insertOne(newCategory)
+        res.json({success:true})
+
+    } catch (error) {
+        return res.status(404).json({ success: false })
+    }
+
 })
 
 module.exports = router;
