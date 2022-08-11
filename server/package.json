@@ -20,5 +20,11 @@
     "morgan": "~1.9.1",
     "nodemon": "^2.0.19",
     "uuidv4": "^6.2.13"
-  }
+  },
+  "description": "",
+  "main": "app.js",
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC",
+  "keywords": []
 }
