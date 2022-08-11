@@ -15,7 +15,8 @@ const createUser = async (username, passwordHash) => {
         const user = {
             username: username,
             password: passwordHash,
-            uid: uuid()
+            uid: uuid(),
+            categoryIdList: []
         }
         const collection = await blogsDB().collection('users');
         await collection.insertOne(user);
@@ -124,10 +125,9 @@ router.get('/validate-token', function (req, res, next) {
 })
 
 router.post('/todos', async function (req, res, next) {
-
     try {
         const collection = await blogsDB().collection("users");
-        const decoded = jwt.decode(req.body.userToken);
+        const decoded = jwt.decode(req.headers.token);
         // console.log(decoded)
         const user = await collection.findOne({
             uid: decoded.userId
@@ -136,11 +136,12 @@ router.post('/todos', async function (req, res, next) {
         if (!user) {
             throw Error("You must login first");
         }
+        
+        
 
-        // console.log(user)
-        // console.log(req.body.text)
         const todoCollection = await blogsDB().collection("todos");
         const toDoId = uuid()
+        
         await todoCollection.insertOne({
             toDoId,
             userId: decoded.userId, // decoded? or encryted when you save userid
@@ -149,13 +150,18 @@ router.post('/todos', async function (req, res, next) {
             startAt: new Date(),
             completedAt: new Date(),
             isCompleted: req.body.isCompleted
-        })
-        const categoryCollection = await blogsDB().collection("categories");
-        const dbCategory = await categoryCollection.findOne({
-            // how do I find categoryId?
-            // how do I choose which categoryId to pick If there are multiple categories?
 
         })
+        const categoryIdList = req.body.categoryIdList
+        // use this id to find which category to use(clicked = true)
+        // then find and update the db
+        const categoryCollection = await blogsDB().collection("categories");
+        const dbCategory = await categoryCollection.updateMany(
+            { categoryId: {
+                $in: categoryIdList
+            }},
+            { $push: { toDoIdList: toDoId } }
+         )
 
         // Find category by categoryId
         // Push toDoId into category.toDoIdList
@@ -172,6 +178,18 @@ router.post('/todos', async function (req, res, next) {
 router.post('/categories', async function (req, res, next) {
 
     try {
+
+        const userCollection = await blogsDB().collection("users");
+        const decoded = jwt.decode(req.headers.token);
+        console.log(decoded)
+        const user = await userCollection.findOne({
+            uid: decoded.userId
+        })
+        console.log(user)
+        if (!user) {
+            throw Error("You must login first");
+        }
+        
         const categoryId = uuid();
         const newCategory = {
             categoryId,
@@ -180,8 +198,14 @@ router.post('/categories', async function (req, res, next) {
         }
         console.log(req.body.categoryName)
         const categoryCollection = await blogsDB().collection("categories")
-        // await categoryCollection.insertOne(newCategory)
-        res.json({success:true})
+        await categoryCollection.insertOne(newCategory)
+
+        const dbUser = await userCollection.update(
+            { uid: decoded.userId },
+            { $push: { categoryIdList: categoryId } }
+         )
+
+        res.json({success:true, categoryId})
 
     } catch (error) {
         return res.status(404).json({ success: false })

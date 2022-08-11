@@ -3,8 +3,8 @@ import '../css/Todo.css'
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserToken, logoutUser } from "../Auth"
-import { todoList } from "../Todo";//post request
-import { CategoryList } from "../Category"; //post request
+import { saveTodo } from "../Todo";//post request
+import { saveCategory } from "../Category"; //post request
 
 const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername }) => {
     const [userToken, setUserToken] = useState("");
@@ -12,9 +12,10 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
     const [todoInput, setTodoInput] = useState('')
     const [categories, setCategories] = useState([]);
     const [categoryInput, setCatetoryInput] = useState('')
+    
     const navigate = useNavigate();
-    console.log(todos)
-    console.log(categories)
+    // console.log(todos)
+    // console.log(categories)
 
     const todoCheckBox = (index) => {
         const newTodo = [...todos]
@@ -24,7 +25,7 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
 
     const categoryChecked = (index) => {
         const newCategory = [...categories]
-        newCategory[index].clicked = !newCategory[index].clicked
+        newCategory[index].checked = !newCategory[index].checked
         setCategories(newCategory)
     }
 
@@ -38,7 +39,8 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
             <div className="category-section">
                 {categories.map((category, index) => (
                     <div key={index}>
-                        <button onClick={() => categoryChecked(index)}>{category.categoryName}</button>
+                        <input type="checkbox" onClick={() => categoryChecked(index)}></input>
+                        <span>{category.categoryName}</span>
                         <button>Delete</button>
                     </div>
                 ))}
@@ -48,14 +50,17 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                     setCatetoryInput(value)
                 }} on placeholder="create categories"></input>
 
-                <button onClick={() => {
+                <button onClick={async () => {
                     if (!categoryInput) {
                         return
                     }
-                    const copyCategories = { categoryName: categoryInput, id: categories.length + 1, clicked: true }
-                    setCategories([...categories, copyCategories])
+                    const newCategory = { categoryName: categoryInput, checked: false }
+                    const categorySaveRes = await saveCategory(newCategory)
+                    if (categorySaveRes.success) {
+                        const categoryId = categorySaveRes.categoryId
+                        setCategories([...categories, {...newCategory, categoryId}])
+                    }
                     setCatetoryInput('')
-                    CategoryList(copyCategories)
                 }}>+</button>
                 {userToken &&
                     <>
@@ -95,13 +100,22 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                             return;
                         }// if there is no categories, then do not add 
 
-                        const copyTodos = { text: todoInput, id: todos.length + 1, isCompleted: false }
-                        setTodos([...todos, copyTodos])
+                        const newTodo = { text: todoInput, isCompleted: false,  }
+                        setTodos([...todos, newTodo])
                         //once button is clicked, assign todos with new object text and id
                         setTodoInput('')//once input is added, clear input
-                        todoList(copyTodos)// sending post request here.
-                        //todoList(copyTodos, categoryList)
-                      
+
+                        const checkedCategoryIds = categories
+                        .filter((category)=>{ // First, filter out unchecked categories
+                            return category.checked
+                        })
+                        .map((category)=>{ // Second, get all category Id's in the list
+                            return category.categoryId
+                        })
+
+                        // saveTodo(newTodo)// sending post request here.
+                        saveTodo(newTodo, checkedCategoryIds)
+                        
                     }}>add</button>
                 </div>
                 <div className="todo-list">

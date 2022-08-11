@@ -1,18 +1,19 @@
 import { getUserToken } from "./Auth"
 const urlEndpoint = process.env.REACT_APP_URL_ENDPOINT;
 
-export const todoList = async (todo) => {
+export const saveTodo = async (todo, categoryIdList) => {
     const url = `${urlEndpoint}/main/todos`
     console.log(todo)
     const userToken = getUserToken()
     console.log(userToken)
-    const todoObj = {...todo, userToken: userToken}
+    const bodyObj = {...todo, categoryIdList}
     const response = await fetch(url, {
         method:"POST",
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            token: userToken
         },
-        body: JSON.stringify(todoObj),
+        body: JSON.stringify(bodyObj),
     });
     const responseJSON = await response.json();
     console.log(responseJSON)

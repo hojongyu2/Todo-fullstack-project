@@ -90,4 +90,10 @@ Note:
         save toDo
         save toDoId to the current Category by pushing toDoId into toDoIdList
 
-        
+
+
+!!
+due Thursday deploying heroku
+work on how to keep data on browser
+ - find userId and update state variable
+then, CRUD operation

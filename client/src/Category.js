@@ -1,16 +1,18 @@
+import { getUserToken } from "./Auth"
 const urlEndpoint = process.env.REACT_APP_URL_ENDPOINT;
 
-export const CategoryList = async (category) => {
+export const saveCategory = async (category) => {
     const url = `${urlEndpoint}/main/categories`
-    console.log(url)
+    const userToken = getUserToken()
     const response = await fetch(url, {
         method:"POST",
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            token: userToken
         },
         body: JSON.stringify(category),
     });
     const responseJSON = await response.json();
     console.log(responseJSON)
-    return {responseJSON}
+    return responseJSON
 }
