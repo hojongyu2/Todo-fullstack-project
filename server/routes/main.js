@@ -240,4 +240,22 @@ router.delete('/todos-delete', async function (req, res, next) {
 
 })
 
+router.delete('/categories-delete', async function (req, res, next) {
+    try {
+        const categoryIds = req.body.map((x)=>{
+            return x.categoryId
+        })
+        console.log(categoryIds.join())
+        const collection = await blogsDB().collection("categories");
+        await collection.deleteMany({
+            categoryId:categoryIds.join()
+        })
+        res.json({success:true})
+
+    }catch (error) {
+        return res.status(404).json({success:false})
+    }
+
+})
+
 module.exports = router;

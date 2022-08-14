@@ -16,3 +16,17 @@ export const saveCategory = async (category) => {
     console.log(responseJSON)
     return responseJSON
 }
+
+export const deleteCategory = async (category) => {
+    const url = `${urlEndpoint}/main/categories-delete`
+    const response = await fetch(url, {
+        method:"DELETE",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(category),
+    });
+    const responseJSON = await response.json();
+    console.log(responseJSON)
+    return responseJSON
+}

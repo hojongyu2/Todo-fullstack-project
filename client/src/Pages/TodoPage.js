@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { getUserToken, logoutUser } from "../Auth"
 import { saveTodo } from "../Todo";//post request
 import { saveCategory } from "../Category"; //post request
-import { deleteTodo } from "../Todo";
+import { deleteTodo } from "../Todo";//delete request
+import { deleteCategory } from "../Category";//delete request
 
 const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername }) => {
     const [userToken, setUserToken] = useState("");
@@ -43,7 +44,11 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         <input type="checkbox" onClick={() => categoryChecked(index)}></input>
                         <span>{category.categoryName}</span>
                         <button onClick={() => {
-
+                            const checkedCategories = categories.filter((x)=>{
+                                return x.checked
+                            })//filter out only checked categories
+                            deleteCategory(checkedCategories)
+                            //send delete request
                         }}>Delete</button>
                     </div>
                 ))}
