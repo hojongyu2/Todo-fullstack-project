@@ -136,12 +136,12 @@ router.post('/todos', async function (req, res, next) {
         if (!user) {
             throw Error("You must login first");
         }
-        
-        
+
+
 
         const todoCollection = await blogsDB().collection("todos");
         const toDoId = uuid()
-        
+
         await todoCollection.insertOne({
             toDoId,
             userId: decoded.userId, // decoded? or encryted when you save userid
@@ -157,17 +157,20 @@ router.post('/todos', async function (req, res, next) {
         // then find and update the db
         const categoryCollection = await blogsDB().collection("categories");
         const dbCategory = await categoryCollection.updateMany(
-            { categoryId: {
-                $in: categoryIdList
-            }},
+            {
+                categoryId: {
+                    $in: categoryIdList
+                }
+            },
             { $push: { toDoIdList: toDoId } }
-         )
+        )
 
         // Find category by categoryId
         // Push toDoId into category.toDoIdList
         // Save category
-        
-        res.status(200).json({ success: true });
+
+        res.status(200).json({ success: true, toDoId });
+        //send todoId back to the front so that I can use it for the delete function
 
     } catch (error) {
         return res.status(404).json({ success: false })
@@ -189,7 +192,7 @@ router.post('/categories', async function (req, res, next) {
         if (!user) {
             throw Error("You must login first");
         }
-        
+
         const categoryId = uuid();
         const newCategory = {
             categoryId,
@@ -202,13 +205,37 @@ router.post('/categories', async function (req, res, next) {
 
         const dbUser = await userCollection.update(
             { uid: decoded.userId },
-            { $push: { categoryIdList: categoryId } }
-         )
+            {
+                $push: {
+                    categoryIdList: categoryId,
+                    categoryName: req.body.categoryName,
+                }
+            }
+        )
 
-        res.json({success:true, categoryId})
+        res.json({ success: true, categoryId })
 
     } catch (error) {
         return res.status(404).json({ success: false })
+    }
+
+})
+
+router.delete('/todos-delete', async function (req, res, next) {
+    try {
+        const todoIds = req.body.map((x)=>{
+            return x.toDoId
+        })
+        // console.log(todoIds.join(''))
+        //without join, it returns as an Array
+        const collection = await blogsDB().collection("todos");
+        await collection.deleteMany({
+            toDoId:todoIds.join()
+        })
+        res.json({success:true})
+
+    }catch (error) {
+        return res.status(404).json({success:false})
     }
 
 })

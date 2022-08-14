@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserToken, logoutUser } from "../Auth"
 import { saveTodo } from "../Todo";//post request
 import { saveCategory } from "../Category"; //post request
+import { deleteTodo } from "../Todo";
 
 const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername }) => {
     const [userToken, setUserToken] = useState("");
@@ -12,7 +13,7 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
     const [todoInput, setTodoInput] = useState('')
     const [categories, setCategories] = useState([]);
     const [categoryInput, setCatetoryInput] = useState('')
-    
+
     const navigate = useNavigate();
     // console.log(todos)
     // console.log(categories)
@@ -41,7 +42,9 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                     <div key={index}>
                         <input type="checkbox" onClick={() => categoryChecked(index)}></input>
                         <span>{category.categoryName}</span>
-                        <button>Delete</button>
+                        <button onClick={() => {
+
+                        }}>Delete</button>
                     </div>
                 ))}
 
@@ -58,7 +61,7 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                     const categorySaveRes = await saveCategory(newCategory)
                     if (categorySaveRes.success) {
                         const categoryId = categorySaveRes.categoryId
-                        setCategories([...categories, {...newCategory, categoryId}])
+                        setCategories([...categories, { ...newCategory, categoryId }])
                     }
                     setCatetoryInput('')
                 }}>+</button>
@@ -92,30 +95,37 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         const value = e.target.value
                         setTodoInput(value)
                     }}></input>
-                    <button onClick={() => {
+                    <button onClick={async () => {
                         if (!todoInput) {
                             return;
                         }// if input is empty, do not add anything
-                        if (categories.length === 0){
+                        if (categories.length === 0) {
                             return;
                         }// if there is no categories, then do not add 
 
-                        const newTodo = { text: todoInput, isCompleted: false,  }
-                        setTodos([...todos, newTodo])
+                        const newTodo = { text: todoInput, isCompleted: false, }
+                        // setTodos([...todos, newTodo])
                         //once button is clicked, assign todos with new object text and id
                         setTodoInput('')//once input is added, clear input
 
                         const checkedCategoryIds = categories
-                        .filter((category)=>{ // First, filter out unchecked categories
-                            return category.checked
-                        })
-                        .map((category)=>{ // Second, get all category Id's in the list
-                            return category.categoryId
-                        })
+                            .filter((category) => { // First, filter out unchecked categories
+                                return category.checked
+                            })
+                            .map((category) => { // Second, get all category Id's in the list
+                                return category.categoryId
+                            })
 
-                        // saveTodo(newTodo)// sending post request here.
-                        saveTodo(newTodo, checkedCategoryIds)
-                        
+                        // saveTodo(newTodo, checkedCategoryIds)
+                        const resTodo = await saveTodo(newTodo, checkedCategoryIds)
+                        //send post request here.
+                        //If respond is sucess, then grab the toDoId and push it to Todos
+                        //so that I can use it for delete functionality
+                            if(resTodo.success){
+                                const toDoId = resTodo.toDoId;
+                                console.log(toDoId)
+                                setTodos([...todos, {...newTodo, toDoId}])
+                            }
                     }}>add</button>
                 </div>
                 <div className="todo-list">
@@ -123,7 +133,14 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         <div key={index}>
                             <input type="checkbox" onChange={() => todoCheckBox(index)}></input>
                             <label>{todo.text}</label>
-                            <button>delete</button>
+                            <button onClick={async () => {
+                                const completedTodo = todos
+                                    .filter((todo) => {
+                                        return todo.isCompleted
+                                    })// filter out false/unchecked value
+                                    await deleteTodo(completedTodo)
+                                    //delete request sends to the backend
+                            }}>delete</button>
                         </div>
                     ))}
                 </div>
