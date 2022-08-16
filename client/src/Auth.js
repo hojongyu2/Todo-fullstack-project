@@ -47,3 +47,21 @@ export const logoutUser = () => {
 export const getUserToken = () => {
     return JSON.parse(localStorage.getItem(process.env.REACT_APP_TOKEN_HEADER_KEY));
 }
+
+export const passToken = async () => {
+    const url = `${urlEndpoint}/main/user-categories`
+    const userToken = getUserToken()
+    // console.log(userToken)
+    const response = await fetch(url, {
+        method:"PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            token: userToken
+        },
+        body: JSON.stringify(),
+    });
+    const responseJSON = await response.json();
+    // console.log(responseJSON)
+    return responseJSON
+}
+

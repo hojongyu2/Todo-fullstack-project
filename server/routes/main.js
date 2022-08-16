@@ -188,7 +188,7 @@ router.post('/categories', async function (req, res, next) {
         const user = await userCollection.findOne({
             uid: decoded.userId
         })
-        console.log(user)
+        // console.log(user)
         if (!user) {
             throw Error("You must login first");
         }
@@ -199,7 +199,7 @@ router.post('/categories', async function (req, res, next) {
             name: req.body.categoryName,
             toDoIdList: []
         }
-        console.log(req.body.categoryName)
+        // console.log(req.body.categoryName)
         const categoryCollection = await blogsDB().collection("categories")
         await categoryCollection.insertOne(newCategory)
 
@@ -245,7 +245,7 @@ router.delete('/categories-delete', async function (req, res, next) {
         const categoryIds = req.body.map((x)=>{
             return x.categoryId
         })
-        console.log(categoryIds.join())
+        // console.log(categoryIds.join())
         const collection = await blogsDB().collection("categories");
         await collection.deleteMany({
             categoryId:categoryIds.join()
@@ -257,5 +257,67 @@ router.delete('/categories-delete', async function (req, res, next) {
     }
 
 })
+// route '/user-categories' gets user token via header
+// run getUserCategories(userId)
+// getUserCategories returns all categories for that userId
+
+router.put('/user-categories', async function(req, res){
+    try {
+        const decoded = jwt.decode(req.headers.token);
+        console.log(decoded.userId)
+        const userId = decoded.userId
+
+        const getUserWithData = async (userId) => {
+            const userCollection = await blogsDB().collection("users");
+            const user = await userCollection.findOne({
+                uid: userId
+            })
+            
+            const categoryCollection = await blogsDB().collection("categories");
+            const categoryList = await categoryCollection.find({
+                categoryId:{$in:user.categoryIdList}
+            }).toArray()
+            
+            const todoIds = categoryList.map((category)=>{
+                return category.toDoIdList
+            }).flat()
+            
+            const todoCollection = await blogsDB().collection("todos");
+            const todoList = await todoCollection.find({
+                toDoId:{$in:todoIds}
+            }).toArray()
+            
+            const filledCategoryList = categoryList.map((category)=>{
+                const filledTodos = category.toDoIdList.map((todoId)=>{
+                    return todoList.find((todo)=>{
+                        return todo.toDoId === todoId
+                    })
+                })
+                const categoryCopy = {
+                    ...category
+                }
+                categoryCopy.toDoList = filledTodos
+                return categoryCopy
+            })
+            
+            const filledUser = {
+                ...user,
+                categoryList: filledCategoryList
+            }
+            
+            return filledUser
+        }
+        const userData = await getUserWithData(userId)
+        // console.log(userData)
+        res.status(200).json({success:true, userData})
+        
+    }catch (error){
+
+        return res.status(404).json({success:false})
+        }
+})
+
+
+
 
 module.exports = router;

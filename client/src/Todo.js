@@ -34,5 +34,6 @@ export const deleteTodo = async (todo) => {
     return responseJSON
 }
 
-
-//
+export const editTodo = async (todo) => {
+    
+}

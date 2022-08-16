@@ -92,8 +92,11 @@ Note:
 
 
 
-!!
-due Thursday deploying heroku
+
 work on how to keep data on browser
  - find userId and update state variable
 then, CRUD operation
+
+
+1. get all category for user in server
+2. get all todo for the categoryId 

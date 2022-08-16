@@ -7,6 +7,10 @@ import { saveTodo } from "../Todo";//post request
 import { saveCategory } from "../Category"; //post request
 import { deleteTodo } from "../Todo";//delete request
 import { deleteCategory } from "../Category";//delete request
+import { getWeather } from "../weather";
+import { getLocationAndTime } from "../weather";
+
+// import Select from 'react-select'
 
 const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername }) => {
     const [userToken, setUserToken] = useState("");
@@ -14,11 +18,14 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
     const [todoInput, setTodoInput] = useState('')
     const [categories, setCategories] = useState([]);
     const [categoryInput, setCatetoryInput] = useState('')
-
+    const [optionValue, setOptionValue] = useState('')
+    const [city, setCity] = useState('') 
+    const [find, setFind] = useState(true)// once city is typed, then disappear
+  
     const navigate = useNavigate();
     // console.log(todos)
     // console.log(categories)
-
+  
     const todoCheckBox = (index) => {
         const newTodo = [...todos]
         newTodo[index].isCompleted = !newTodo[index].isCompleted;
@@ -30,6 +37,20 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
         newCategory[index].checked = !newCategory[index].checked
         setCategories(newCategory)
     }
+
+    // const handleEdit = () => {
+    //     setIsEdit(current => !current)
+    // }
+
+    const categoriesName = categories.map((x) => {
+        const editOption =
+            { value: x.categoryName, label: x.categoryName }
+        return editOption
+    })// select options
+
+    // const selectStyles = {
+
+    // }
 
     useEffect(() => {
         const localUserToken = getUserToken();
@@ -44,7 +65,7 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         <input type="checkbox" onClick={() => categoryChecked(index)}></input>
                         <span>{category.categoryName}</span>
                         <button onClick={() => {
-                            const checkedCategories = categories.filter((x)=>{
+                            const checkedCategories = categories.filter((x) => {
                                 return x.checked
                             })//filter out only checked categories
                             deleteCategory(checkedCategories)
@@ -92,8 +113,23 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                     </>}
             </div>
             <div className="todo-section">
+                {find && (
+                    <div>
+                    <input value={city} onChange={(e)=>{
+                        getLocationAndTime()
+                        // getLocationAndTime()//get time and location
+                        setCity(e.target.value)
+                    }} placeholder="serch city"></input>
+                    <button onClick={()=>{
+                        getWeather(city)//get weather data
+                        setFind(false)
+                    }}>get</button>
+                </div>
+                )}
+                
                 <div className="welcome">
-                    <h2>welcome {showUsername}</h2>
+                    
+                    <h2>welcome {showUsername} </h2>
                 </div>
                 <div className="todo-submit">
                     <input type="text" value={todoInput} onChange={(e) => {
@@ -124,13 +160,14 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         // saveTodo(newTodo, checkedCategoryIds)
                         const resTodo = await saveTodo(newTodo, checkedCategoryIds)
                         //send post request here.
+
                         //If respond is sucess, then grab the toDoId and push it to Todos
                         //so that I can use it for delete functionality
-                            if(resTodo.success){
-                                const toDoId = resTodo.toDoId;
-                                console.log(toDoId)
-                                setTodos([...todos, {...newTodo, toDoId}])
-                            }
+                        if (resTodo.success) {
+                            const toDoId = resTodo.toDoId;
+                            // console.log(toDoId)
+                            setTodos([...todos, { ...newTodo, toDoId }])
+                        }
                     }}>add</button>
                 </div>
                 <div className="todo-list">
@@ -138,13 +175,25 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         <div key={index}>
                             <input type="checkbox" onChange={() => todoCheckBox(index)}></input>
                             <label>{todo.text}</label>
+                            <select value={optionValue} onChange={(e) => {
+                                const value = e.target.value
+                                setOptionValue(value)
+                            }} >
+                                {categoriesName.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <button>move</button>
                             <button onClick={async () => {
                                 const completedTodo = todos
                                     .filter((todo) => {
                                         return todo.isCompleted
                                     })// filter out false/unchecked value
-                                    await deleteTodo(completedTodo)
-                                    //delete request sends to the backend
+                                await deleteTodo(completedTodo)
+                                //delete request sends to the backend
                             }}>delete</button>
                         </div>
                     ))}
