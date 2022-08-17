@@ -8,7 +8,7 @@ import { saveCategory } from "../Category"; //post request
 import { deleteTodo } from "../Todo";//delete request
 import { deleteCategory, getUserCategories } from "../Category";//delete request
 import { getWeather } from "../weather";
-import { getLocationAndTime } from "../weather";
+// import { getLocationAndTime } from "../weather";
 
 
 const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsername, town, temp }) => {
@@ -19,59 +19,56 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
     const [categoryInput, setCatetoryInput] = useState('')
     const [city, setCity] = useState('')
     const [find, setFind] = useState(true)// once city is typed, then disappear
-    const [wea, setWea] = useState()
+    const [optionValue, setOptionValue] = useState('')
     const [isCategoryDataLoading, setIsCategoryDataLoading] = useState(false);
     const navigate = useNavigate();
 
-
-    const todoCheckBox = (index) => {
-        const newTodo = [...todos]
-        newTodo[index].isCompleted = !newTodo[index].isCompleted;
-        setTodos(newTodo)
-    }
-
-    const categoryChecked = (index) => {
-        const newCategory = [...categories]
-        newCategory[index].checked = !newCategory[index].checked
-        setCategories(newCategory)
-    }
-
+    
     useEffect(() => {
         const fetchUserToDoData = async () => {
             const userDataResponse = await getUserCategories()
-            console.log("userDataResponse ", userDataResponse)
+            // console.log("userDataResponse ", userDataResponse)
             const userCategories = userDataResponse.userData.categoryList
-            console.log("userCategories ", userCategories)
+            // console.log("userCategories ", userCategories)
             setCategories(userCategories)
 
+            setShowUsername(userDataResponse.userData.username)
+
             const userCategoriesTodoList = userCategories.map((x) => {
-                return x.toDoList.map((x) => {
-                    return x
-                })
+                return x.toDoList
             })
             console.log(userCategoriesTodoList)
             const userCategoriesTodos = userCategoriesTodoList.flat()
-            setTodos(userCategoriesTodos)//there is a bug here. Null value once todo is deleted
+            // setTodos(userCategoriesTodos)//there is a bug here. Null value present once todo is deleted
         }
         fetchUserToDoData()
     }, [isCategoryDataLoading])
+    // console.log(todos)
+    
 
     useEffect(() => {
         const localUserToken = getUserToken();
         setUserToken(localUserToken);
     }, [isAuthLoading]);
 
+    const categoriesName = categories.map((x) => {
+        const editOption =
+            { value: x.name, name: x.name, id:x.categoryId}
+        return editOption
+    })
+
     return (
         <div className="contatiner">
             <div className="category-section">
+
                 {categories.map((category, index) => (
                     <div key={index}>
-                        <input type="checkbox" onClick={() => categoryChecked(index)}></input>
-                        <span>{category.name}</span>
-                        <button onClick={() => {
-                            
-                            deleteCategory([category])//send delete request
-
+                        <span>{category.name}  {category.toDoIdList.length}</span>
+                        <button onClick={async() => {
+                            setIsCategoryDataLoading(true)
+                            await deleteCategory([category])//send delete request
+                            setIsCategoryDataLoading(false)
+                            // why???????????????
                         }}>Delete</button>
                     </div>
                 ))}
@@ -137,11 +134,24 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         const value = e.target.value
                         setTodoInput(value)
                     }}></input>
+
+                    <select value={optionValue} onChange={(e) => {
+                        const value = e.target.value
+                        setOptionValue(value)
+                    }} >
+                        {categoriesName.map(option => (
+                            <option key={option.value} value={option.id}>
+                                {option.name}
+                            </option>
+                        ))}
+                    </select>
+
                     <button onClick={async () => {
                         if (!todoInput) {
                             return;
                         }// if input is empty, do not add anything
                         if (categories.length === 0) {
+                            setTodoInput('')
                             return;
                         }// if there is no categories, then do not add 
 
@@ -150,15 +160,10 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                         //once button is clicked, assign todos with new object text and id
                         setTodoInput('')//once input is added, clear input
 
-                        const checkedCategoryIds = categories
-                            .filter((category) => { // First, filter out unchecked categories
-                                return category.checked
-                            })
-                            .map((category) => { // Second, get all category Id's in the list
-                                return category.categoryId
-                            })
+                        const checkedCategoryIds = optionValue // get category Id that are selected
+                       
                         setIsCategoryDataLoading(true)
-                        const resTodo = await saveTodo(newTodo, checkedCategoryIds)//send post request here.
+                        const resTodo = await saveTodo(newTodo, [checkedCategoryIds])//send post request here.
                         setIsCategoryDataLoading(false)
                         //If respond is sucess, then grab the toDoId and push it to Todos
                         //so that I can use it for delete functionality
@@ -172,15 +177,15 @@ const TodoPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUserna
                 <div className="todo-list">
                     {todos.map((todo, index) => (
                         <div key={index}>
-                            <input type="checkbox" onChange={() => todoCheckBox(index)}></input>
                             <label>{todo.text}</label>
-
                             <button onClick={async () => {
                                 // const completedTodo = todos
                                 //     .filter((todo) => {
                                 //         return todo.isCompleted
                                 //     })// filter out false/unchecked value
+                                setIsCategoryDataLoading(true)
                                 await deleteTodo([todo])
+                                setIsCategoryDataLoading(true)
                                 //delete request sends to the backend
                             }}>delete</button>
                         </div>

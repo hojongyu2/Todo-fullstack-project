@@ -137,8 +137,6 @@ router.post('/todos', async function (req, res, next) {
             throw Error("You must login first");
         }
 
-
-
         const todoCollection = await blogsDB().collection("todos");
         const toDoId = uuid()
         // const categoryId = req.body
@@ -230,9 +228,11 @@ router.delete('/todos-delete', async function (req, res, next) {
         // console.log(todoIds.join(''))
         //without join, it returns as an Array
         const collection = await blogsDB().collection("todos");
-        await collection.deleteMany({
+        await collection.deleteOne({
             toDoId:todoIds.join()
         })
+        // const categoryCollection = await blogsDB().collection("categories");
+        // await categoryCollection.findOne({})
         res.json({success:true})
 
     }catch (error) {
