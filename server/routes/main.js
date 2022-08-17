@@ -141,7 +141,8 @@ router.post('/todos', async function (req, res, next) {
 
         const todoCollection = await blogsDB().collection("todos");
         const toDoId = uuid()
-
+        // const categoryId = req.body
+        // console.log(req.body)
         await todoCollection.insertOne({
             toDoId,
             userId: decoded.userId, // decoded? or encryted when you save userid
@@ -261,7 +262,7 @@ router.delete('/categories-delete', async function (req, res, next) {
 // run getUserCategories(userId)
 // getUserCategories returns all categories for that userId
 
-router.put('/user-categories', async function(req, res){
+router.post('/user-categories', async function(req, res){
     try {
         const decoded = jwt.decode(req.headers.token);
         console.log(decoded.userId)
@@ -309,15 +310,12 @@ router.put('/user-categories', async function(req, res){
         }
         const userData = await getUserWithData(userId)
         // console.log(userData)
-        res.status(200).json({success:true, userData})
+        res.status(200).json({success:true, userData, decoded})
         
     }catch (error){
 
         return res.status(404).json({success:false})
         }
 })
-
-
-
 
 module.exports = router;

@@ -3,7 +3,6 @@ import React from "react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react";
 import { loginUser } from "../Auth";
-import { passToken } from "../Auth";
 
 const loginValidator = (username, password) => {
     if (!username) {
@@ -65,7 +64,6 @@ const LoginPage = ({ isAuthLoading, setIsAuthLoading, showUsername, setShowUsern
                         setIsAuthLoading(true)
                         if (loginResult) {
                             setIsAuthLoading(false)
-                            passToken()
                             navigate('/todo')
                         }
                     }}>Login</button>

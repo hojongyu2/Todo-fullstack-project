@@ -13,9 +13,9 @@ export const saveCategory = async (category) => {
         body: JSON.stringify(category),
     });
     const responseJSON = await response.json();
-    console.log(responseJSON)
+    console.log(responseJSON.categoryId)
     return responseJSON
-}
+}// categoryId needs to be pushed in when todo is created
 
 export const deleteCategory = async (category) => {
     const url = `${urlEndpoint}/main/categories-delete`
@@ -28,5 +28,22 @@ export const deleteCategory = async (category) => {
     });
     const responseJSON = await response.json();
     console.log(responseJSON)
+    return responseJSON
+}
+
+export const getUserCategories = async () => {
+    const url = `${urlEndpoint}/main/user-categories`
+    const userToken = getUserToken()
+    // console.log(userToken)
+    const response = await fetch(url, {
+        method:"POST",
+        headers: {
+            'Content-Type': 'application/json',
+            token: userToken
+        },
+        body: JSON.stringify(),
+    });
+    const responseJSON = await response.json();
+    // console.log(responseJSON)
     return responseJSON
 }
