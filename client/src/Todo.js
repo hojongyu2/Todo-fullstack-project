@@ -3,9 +3,9 @@ const urlEndpoint = process.env.REACT_APP_URL_ENDPOINT;
 
 export const saveTodo = async (todo, categoryIdList) => {
     const url = `${urlEndpoint}/main/todos`
-    console.log(todo)
+    // console.log(todo)
     const userToken = getUserToken()
-    console.log(userToken)
+    // console.log(userToken)
     const bodyObj = {...todo, categoryIdList}
     const response = await fetch(url, {
         method:"POST",

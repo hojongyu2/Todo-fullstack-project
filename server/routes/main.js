@@ -249,10 +249,7 @@ router.delete('/todos-delete', async function (req, res, next) {
         console.log("categoryIdToBeUsedToReMoveToDoId + " + categoryIdToBeUsedToReMoveToDoId)
         // //works till
         const updatedToDoIdList = category.toDoIdList.filter((toDoId)=> toDoId !== toDoIdToRemove)
-        // const consol = await categoryCollection.findOne({
-        //     categoryId:categoryIdToBeUsedToReMoveToDoId
-        // })
-        // console.log(consol)
+        
         await categoryCollection.findOneAndUpdate({
             categoryId:categoryIdToBeUsedToReMoveToDoId
         }, {
@@ -260,7 +257,7 @@ router.delete('/todos-delete', async function (req, res, next) {
                 toDoIdList: updatedToDoIdList
             }
         })
-        
+        return res.status(200).json({success:true})
 
     } catch (error) {
         return res.status(404).json({ success: false })
